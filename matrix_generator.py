@@ -92,7 +92,7 @@ def preprocessing_threshold_removal(df):
 		# 	if count >= 0.75*total_count:
 		# 		flag = 1
 		for key, value in a.items():
-			if(value > 0.5*total_count):
+			if(value > 0.7*total_count):
 				df = df.drop(i, axis = 1)
 				flag1 = 1
 				break
@@ -116,7 +116,15 @@ def preprocessing_threshold_removal(df):
 	print(len(df.columns.tolist()))
 	# temp_df.remove('file_id')
 	# print(temp_df)
+	for i in df.columns.tolist()[1:]:
+		mean_value = df[i].mean()
+		std_value = df[i].values.std(ddof=1)
+		if std_value < 0.5*mean_value:
+			df.drop(i, axis = 1)
+			print(i)
+	print(len(df.columns.tolist()))
 	df = df.dropna(axis=0, how='any', subset=df.columns.tolist()[1:])
+
 	return df
 
 class MatrixGenerator():
@@ -127,17 +135,17 @@ class MatrixGenerator():
 
 	def generator(self):
 		# extract data
-		error_code = 1
-		matrix_df = extractMatrix(self.input_dir)
-		label_df = extractLabel(self.input_file)
+		# error_code = 1
+		# matrix_df = extractMatrix(self.input_dir)
+		# label_df = extractLabel(self.input_file)
 
 		# #merge the two based on the file_id
-		result = pd.merge(matrix_df, label_df, on='file_id', how="left")
+		# result = pd.merge(matrix_df, label_df, on='file_id', how="left")
 		#print(result)
-		# df = pd.read_csv(self.output_file)
-		df = preprocessing_threshold_removal(result)
+		df = pd.read_csv("matrix.csv")
+		df = preprocessing_threshold_removal(df)
 		# df = result
-		#save data
+		# #save data
 		df.to_csv(self.output_file, index=False)
 		if(Path(self.output_file).is_file() and os.path.getsize(self.output_file)):
 			error_code = 0
